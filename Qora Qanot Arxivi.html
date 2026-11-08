@@ -1,0 +1,803 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Qora Qanot Arxivi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<style>
+/* Layout: one narrow dark column read like pages of a case file; full-bleed overlays (flashlight mask, grain, vignette) sit above it. */
+:root {
+  --bg: #050505;
+  --ink: #bdb8aa;
+  --bone: #e8e2cf;
+  --blood: #8a0303;
+  --blood-bright: #c40f0f;
+  --sick: #6c7a68;
+  --paper: #121210;
+  --line: #2a2a25;
+  --f-display: 'IM Fell English SC', Georgia, 'Times New Roman', serif;
+  --f-type: 'Special Elite', 'Courier New', monospace;
+  color-scheme: dark;
+}
+
+html.locked { overflow: hidden; }
+html { scroll-behavior: auto; background: var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-type);
+  font-size: 16px;
+  line-height: 1.7;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+}
+
+.wrap { max-width: 44rem; margin-inline: auto; min-width: 0; }
+section { padding-block: clamp(3rem, 10vw, 6rem); }
+
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; color: var(--bone); text-wrap: balance; margin: 0; }
+p { margin: 0 0 1.1rem; max-width: 65ch; }
+
+.label {
+  font-size: .72rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--sick);
+}
+
+/* ---------- Gate ---------- */
+#gate {
+  position: fixed; inset: 0; z-index: 400;
+  background: #000;
+  display: grid; place-items: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  overflow-y: auto;
+  transition: opacity 1.1s ease;
+}
+#gate.gone { opacity: 0; pointer-events: none; }
+.gate-box { max-width: 30rem; width: 100%; text-align: center; }
+.gate-box h2 { font-size: clamp(2.2rem, 9vw, 3.4rem); color: var(--blood-bright); letter-spacing: .08em; margin-bottom: 1.2rem; }
+.gate-box p { margin-inline: auto; font-size: .95rem; }
+.warn {
+  border: 1px solid var(--blood);
+  padding: .9rem 1rem;
+  margin: 1.4rem 0;
+  text-align: left;
+  font-size: .85rem;
+  color: var(--bone);
+}
+.warn strong { color: var(--blood-bright); letter-spacing: .12em; text-transform: uppercase; font-weight: 400; }
+.calm-opt { display: flex; gap: .7rem; align-items: flex-start; text-align: left; font-size: .85rem; margin: 0 0 1.6rem; cursor: pointer; }
+.calm-opt input { margin-top: .3rem; accent-color: var(--blood-bright); width: 1.1rem; height: 1.1rem; flex: none; }
+.btn {
+  font: inherit; letter-spacing: .14em; text-transform: uppercase;
+  background: transparent; color: var(--bone);
+  border: 1px solid var(--blood);
+  padding: .95rem 1.5rem;
+  cursor: pointer; width: 100%;
+  transition: background .25s, color .25s;
+}
+.btn:hover { background: var(--blood); }
+.btn:focus-visible, .link:focus-visible, .redact:focus-visible, .key:focus-visible, .err button:focus-visible {
+  outline: 2px solid var(--bone); outline-offset: 3px;
+}
+.link {
+  display: inline-block; margin-top: 1rem;
+  background: none; border: 0; padding: .4rem;
+  font: inherit; font-size: .8rem; color: var(--sick);
+  text-decoration: underline; cursor: pointer;
+}
+
+/* ---------- Atmosphere layers ---------- */
+#dark {
+  position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  background: radial-gradient(circle var(--r, 220px) at var(--x, 50%) var(--y, 40%),
+    rgba(0,0,0,0) 0%, rgba(0,0,0,.35) 45%, rgba(0,0,0,.9) 100%);
+}
+#vig {
+  position: fixed; inset: 0; z-index: 51; pointer-events: none;
+  box-shadow: inset 0 0 170px 60px #000;
+  transition: box-shadow .12s ease-out;
+}
+#vig.beat { box-shadow: inset 0 0 230px 95px #000, inset 0 0 100px 24px rgba(138,3,3,.38); }
+#grain {
+  position: fixed; inset: -50%; width: 200%; height: 200%; z-index: 52; pointer-events: none;
+  opacity: .15; mix-blend-mode: screen;
+  animation: grain .9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0,0); } 17% { transform: translate(-6%,4%); }
+  33% { transform: translate(5%,-7%); } 50% { transform: translate(-3%,8%); }
+  67% { transform: translate(7%,2%); } 83% { transform: translate(-8%,-4%); }
+  100% { transform: translate(0,0); }
+}
+#dark.dip { opacity: .55; }
+
+/* ---------- Eyes ---------- */
+.eye-pair { position: fixed; z-index: 60; display: flex; gap: .9rem; opacity: 0; transition: opacity .5s; pointer-events: none; }
+.eye-pair.on { opacity: .95; }
+.eye { width: 26px; height: 13px; border-radius: 50%; background: #d9d3bb; position: relative; overflow: hidden; box-shadow: 0 0 14px 2px rgba(196,15,15,.35); }
+.eye i { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: #000; transform: translate(var(--px, 0px), var(--py, 0px)); }
+.e1 { top: calc(14% + env(safe-area-inset-top, 0px)); left: 7%; }
+.e2 { bottom: calc(12% + env(safe-area-inset-bottom, 0px)); right: 8%; }
+.e3 { top: 56%; left: 3%; }
+.e4 { top: 32%; right: 4%; }
+
+/* ---------- REC ---------- */
+#rec {
+  position: fixed; z-index: 70; display: none;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  font-size: .72rem; letter-spacing: .12em; color: var(--bone);
+  background: rgba(0,0,0,.55); padding: .35rem .6rem; border: 1px solid #222;
+  font-variant-numeric: tabular-nums;
+}
+#rec.show { display: block; }
+#rec b { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--blood-bright); margin-right: .5rem; animation: blink 1.2s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .1; } }
+
+/* ---------- Ghost words ---------- */
+.ghost {
+  position: fixed; z-index: 65; pointer-events: none;
+  font-family: var(--f-display); color: var(--blood-bright);
+  font-size: clamp(2rem, 9vw, 5rem); letter-spacing: .1em; white-space: nowrap;
+  opacity: 0; animation: ghost 1.5s ease-out forwards;
+  text-shadow: 0 0 18px rgba(196,15,15,.6);
+}
+@keyframes ghost { 0% { opacity: 0; } 12% { opacity: .85; } 100% { opacity: 0; } }
+
+/* ---------- Hero ---------- */
+.hero { padding-top: calc(clamp(4.5rem, 14vw, 8rem) + env(safe-area-inset-top, 0px)); }
+.logo {
+  position: relative; display: block;
+  font-size: clamp(2.8rem, 14vw, 6.6rem); line-height: 1; letter-spacing: .05em;
+  color: var(--bone); text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(138,3,3,.55);
+  margin: 1rem 0 1.6rem;
+}
+.logo::before, .logo::after { content: attr(data-t); position: absolute; left: 0; top: 0; width: 100%; opacity: .75; }
+.logo::before { color: var(--blood-bright); animation: glitch1 3.4s infinite steps(1); }
+.logo::after { color: var(--sick); animation: glitch2 4.1s infinite steps(1); }
+@keyframes glitch1 {
+  0%, 92%, 100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  93% { clip-path: inset(15% 0 60% 0); transform: translate(-6px, 0); }
+  95% { clip-path: inset(55% 0 20% 0); transform: translate(5px, 0); }
+  97% { clip-path: inset(30% 0 45% 0); transform: translate(-3px, 0); }
+}
+@keyframes glitch2 {
+  0%, 88%, 100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  89% { clip-path: inset(60% 0 10% 0); transform: translate(6px, 0); }
+  91% { clip-path: inset(8% 0 75% 0); transform: translate(-5px, 0); }
+}
+.lede { font-size: 1.05rem; color: var(--bone); }
+.nodown { margin-top: 2.6rem; border: 1px solid var(--blood); padding: 1rem 1.1rem; }
+.nodown strong { display: block; font-family: var(--f-display); font-weight: 400; color: var(--blood-bright); font-size: 1.5rem; letter-spacing: .12em; animation: nod 2.6s steps(1) infinite; }
+.nodown span { font-size: .85rem; }
+@keyframes nod { 0%, 86%, 100% { opacity: 1; } 88% { opacity: .25; } 90% { opacity: 1; } 93% { opacity: .35; } }
+
+.flick.alt { color: var(--blood-bright); text-shadow: 0 0 10px rgba(196,15,15,.7); letter-spacing: .06em; }
+
+/* ---------- Files ---------- */
+.sec-head { display: grid; gap: .5rem; margin-bottom: 2rem; }
+.sec-head h2 { font-size: clamp(1.9rem, 7vw, 3rem); }
+.files { display: grid; gap: 1.6rem; }
+.file { position: relative; background: var(--paper); border: 1px solid var(--line); padding: 1.3rem 1.3rem 3.4rem; min-width: 0; }
+.file header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; margin-bottom: 1rem; border-bottom: 1px dashed var(--line); padding-bottom: .8rem; }
+.file h3 { font-size: 1.6rem; }
+.file dl { margin: 0; display: grid; gap: .8rem; }
+.file dl div { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: .8rem; align-items: baseline; }
+.file dt { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sick); }
+.file dd { margin: 0; font-size: .95rem; overflow-wrap: anywhere; }
+.stamp {
+  position: absolute; right: 14px; bottom: 14px; pointer-events: none;
+  border: 2px solid var(--blood); color: var(--blood);
+  font-family: var(--f-display); letter-spacing: .2em; padding: .15rem .6rem;
+  transform: rotate(-7deg); opacity: .6; font-size: 1rem;
+}
+.redact {
+  display: inline-block; cursor: pointer;
+  background: #000; color: #232320; outline: 1px solid #25251f;
+  padding: 0 .35rem; user-select: none;
+  letter-spacing: -.05em;
+}
+.redact.open { background: transparent; color: var(--blood-bright); outline-color: transparent; letter-spacing: 0; user-select: auto; text-shadow: 0 0 8px rgba(196,15,15,.55); }
+.key {
+  position: absolute; left: 14px; bottom: 12px;
+  background: none; border: 0; padding: .5rem; color: #6b5a3a;
+  opacity: .22; cursor: pointer; transition: opacity .3s;
+}
+.key:hover, .key:focus-visible { opacity: .85; }
+.key svg { width: 34px; height: 34px; display: block; }
+
+/* ---------- Diary ---------- */
+.diary { display: grid; gap: 1.4rem; }
+.entry { border-top: 1px solid var(--line); padding-top: 1rem; }
+.entry time { display: block; margin-bottom: .5rem; font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--sick); }
+.entry p { margin: 0; font-size: 1.05rem; color: var(--bone); }
+.entry.seen p { animation: seen 1.1s steps(1); }
+@keyframes seen { 0% { opacity: .1; } 15% { opacity: 1; } 22% { opacity: .2; } 30% { opacity: 1; } 55% { opacity: .6; } 60% { opacity: 1; } }
+.entry.last p { color: var(--blood-bright); font-family: var(--f-display); font-size: 1.4rem; }
+
+/* ---------- Talk ---------- */
+#talk { min-height: 70vh; }
+#talk-out { min-height: 14rem; }
+#talk-out p { font-size: 1.15rem; color: var(--bone); margin-bottom: .9rem; }
+#talk-out p.hot { color: var(--blood-bright); font-family: var(--f-display); font-size: 1.7rem; letter-spacing: .06em; }
+.caret::after { content: "_"; animation: blink 1s steps(2) infinite; }
+.foot { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); font-size: .78rem; color: var(--sick); display: grid; gap: .8rem; justify-items: start; }
+.foot .link { margin: 0; padding-left: 0; }
+.foot-pad { height: calc(2rem + env(safe-area-inset-bottom, 0px)); }
+
+/* ---------- Popups ---------- */
+.err {
+  position: fixed; z-index: 120; left: 50%; top: 50%;
+  width: min(92vw, 22rem);
+  background: #161616; border: 1px solid #555; box-shadow: 0 0 0 1px #000, 0 12px 40px rgba(0,0,0,.8);
+  font-size: .85rem; color: var(--bone);
+}
+.err .bar { background: var(--blood); padding: .3rem .7rem; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+.err .body { padding: 1rem .9rem .6rem; }
+.err .body p { margin: 0; }
+.err .acts { padding: .4rem .9rem 1rem; display: flex; justify-content: flex-end; }
+.err button { font: inherit; background: #222; color: var(--bone); border: 1px solid #666; padding: .4rem 1.4rem; cursor: pointer; }
+.err button:hover { background: #333; }
+
+/* ---------- Secret ---------- */
+#secret {
+  position: fixed; inset: 0; z-index: 130; background: rgba(0,0,0,.94);
+  display: grid; place-items: center; text-align: center; cursor: pointer;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+}
+#secret div { max-width: 28rem; }
+#secret h3 { color: var(--blood-bright); font-size: 2rem; margin-bottom: 1rem; letter-spacing: .08em; }
+#secret p { margin-inline: auto; color: var(--bone); }
+#secret small { color: var(--sick); }
+
+/* ---------- Jump scare ---------- */
+#jump {
+  position: fixed; inset: 0; z-index: 500; background: #000;
+  display: grid; place-items: center; align-content: center; gap: 1rem;
+  opacity: 0; pointer-events: none; overflow: hidden;
+}
+#jump.go { opacity: 1; pointer-events: auto; animation: jin 2.2s linear forwards; }
+#jump svg { width: min(78vw, 70vh, 28rem); height: auto; transform-origin: 50% 40%; animation: fscale 2.2s ease-in forwards, jitter .09s steps(2) infinite; }
+#jump p { margin: 0; font-family: var(--f-display); color: var(--blood-bright); font-size: clamp(1.8rem, 8vw, 3.4rem); letter-spacing: .12em; text-align: center; }
+@keyframes jin {
+  0% { opacity: 0; background: #000; }
+  3% { opacity: 1; background: #fff; }
+  8% { opacity: 1; background: #000; }
+  85% { opacity: 1; background: #000; }
+  100% { opacity: 0; background: #000; }
+}
+@keyframes fscale { 0% { transform: scale(.5); } 12% { transform: scale(.85); } 100% { transform: scale(1.35); } }
+@keyframes jitter { 0% { translate: 0 0; } 50% { translate: 5px -4px; } 100% { translate: -4px 3px; } }
+#page.shake { animation: shake .08s linear infinite; }
+@keyframes shake { 0% { transform: translate(0,0); } 25% { transform: translate(-9px,5px); } 50% { transform: translate(8px,-6px); } 75% { transform: translate(-6px,-5px); } 100% { transform: translate(6px,6px); } }
+
+/* ---------- Reduced motion / calm mode ---------- */
+html.calm *, html.calm *::before, html.calm *::after { animation: none !important; transition-duration: .01ms !important; }
+html.calm #jump.go { opacity: .85; background: #000; }
+html.calm #jump svg { transform: scale(.7); }
+html.calm .logo::before, html.calm .logo::after { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  #jump.go { opacity: .85; background: #000; }
+  #jump svg { transform: scale(.7); }
+  .logo::before, .logo::after { display: none; }
+}
+</style>
+
+<div id="page">
+  <main class="wrap">
+
+    <section class="hero" aria-labelledby="t">
+      <p class="label">Raqamli arxiv · Ichki foydalanish uchun · Fayl № 7</p>
+      <h1 id="t" class="logo" data-t="Qora Qanot">Qora Qanot</h1>
+      <p class="lede">Ruhiy kasalliklar sanatoriysi, <span class="flick" data-alt="U KELADI">1974–1987</span>. Bino 1987-yil noyabrida bir kechada yopilgan. Hujjatlar qoldi. <span class="flick" data-alt="ORQANGDA">Kameralar</span> hali ham yozmoqda.</p>
+      <p>Siz bu arxivni oxirgi marta ochgan odamdan keyingi birinchi kishisiz.</p>
+      <div class="nodown">
+        <strong>PASTGA AYLANTIRMANG</strong>
+        <span>Bu yerda tugatilmagan ishlar bor. Biz sizni ogohlantirdik.</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="files-h">
+      <div class="sec-head">
+        <span class="label">Bemor fayllari</span>
+        <h2 id="files-h">Uch papka. Birontasi yopilmagan.</h2>
+        <p>Qora chiziqlarni bosib koʻring. Kimdir ularni sizdan yashirgan.</p>
+      </div>
+
+      <div class="files">
+        <article class="file">
+          <header>
+            <span class="label">Bemor № 4</span>
+            <h3 class="flick" data-alt="SEN">Madina S.</h3>
+          </header>
+          <dl>
+            <div><dt>Yoshi</dt><dd>29</dd></div>
+            <div><dt>Tashxis</dt><dd><span class="redact" data-reveal="oynadan javob berardi">██████████████</span></dd></div>
+            <div><dt>Holat</dt><dd>Uch hafta oldin yoʻqoldi. Xonasi ichkaridan qulflangan edi.</dd></div>
+            <div><dt>Izoh</dt><dd>Devorda 41 ta chiziq. <span class="redact" data-reveal="har kecha bittadan, endi 42">████████████</span></dd></div>
+          </dl>
+          <span class="stamp">MAXFIY</span>
+        </article>
+
+        <article class="file">
+          <header>
+            <span class="label">Bemor № 7</span>
+            <h3 class="flick" data-alt="U SENI KOʻRYAPTI"><span class="redact" data-reveal="ismi yoʻq">██████ ████</span></h3>
+          </header>
+          <dl>
+            <div><dt>Yoshi</dt><dd>Maʼlum emas</dd></div>
+            <div><dt>Tashxis</dt><dd>Qoʻyib boʻlmadi.</dd></div>
+            <div><dt>Holat</dt><dd>Faqat tunda gapiradi. Faqat kamera yoqiq boʻlganda.</dd></div>
+            <div><dt>Izoh</dt><dd>Xonasidan hech qachon chiqmagan. Izlari esa koridorda. <span class="redact" data-reveal="sizning eshigingizgacha">████████████</span></dd></div>
+          </dl>
+          <button class="key" id="key" type="button" aria-label="Zanglagan kalit">
+            <svg viewBox="0 0 40 40" fill="currentColor" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="3.4"/><rect x="16" y="16" width="5" height="22" transform="rotate(-45 18.5 27)"/><rect x="26" y="22" width="9" height="3.6" transform="rotate(-45 30 24)"/><rect x="21" y="27" width="9" height="3.6" transform="rotate(-45 25 29)"/></svg>
+          </button>
+          <span class="stamp">KUZATUVDA</span>
+        </article>
+
+        <article class="file">
+          <header>
+            <span class="label">Bemor № 11</span>
+            <h3 class="flick" data-alt="SIZNING ISMINGIZ">Dr. B. Raximov</h3>
+          </header>
+          <dl>
+            <div><dt>Yoshi</dt><dd>44</dd></div>
+            <div><dt>Tashxis</dt><dd><span class="redact" data-reveal="kuzatuvchi bo‘lib qolgan">███████████████</span></dd></div>
+            <div><dt>Holat</dt><dd>Shifokor edi. Oxirgi yozuvdan soʻng xonasi boʻsh topildi.</dd></div>
+            <div><dt>Izoh</dt><dd>Kundalik yarim qoldi. <span class="redact" data-reveal="oxirgi satr sizga yozilgan">████████</span></dd></div>
+          </dl>
+          <span class="stamp">YOʻQOLGAN</span>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="diary-h">
+      <div class="sec-head">
+        <span class="label">Doktor Raximovning kundaligi</span>
+        <h2 id="diary-h">Oxirgi sakkiz kun</h2>
+      </div>
+
+      <div class="diary">
+        <article class="entry"><time>3-noyabr, 1987</time><p>Yangi bemor keldi. Ismi yoʻq, hujjatlarida faqat raqam: 7. U hech narsa demaydi, faqat devorga qarab turadi.</p></article>
+        <article class="entry"><time>5-noyabr, 1987</time><p>Kechasi koridorda qadam tovushlari eshitildi. Navbatchi hamshira hech kim yoʻq dedi. Men ishondim.</p></article>
+        <article class="entry"><time>9-noyabr, 1987</time><p>Yettinchi bemor birinchi marta gapirdi: “Siz soat nechada uxlaysiz?” Men javob bermadim. U jilmaydi.</p></article>
+        <article class="entry"><time>11-noyabr, 1987</time><p>Kameralar tunda oʻzlari yonib oʻchadi. Yozuvlarda men koʻrinaman. Uxlab yotibman. Va ortimda kimdir turibdi.</p></article>
+        <article class="entry"><time>12-noyabr, 1987</time><p>Yetti hech qachon xonasidan chiqmagan. Ammo kecha uning izlari mening xonamgacha keldi. Ular eshik oldida toʻxtagan. Ichkariga qarab.</p></article>
+        <article class="entry"><time>13-noyabr, 1987</time><p>Hamshira ketdi. Qolganlar ham. Binoda biz ikkimiz qoldik. Yoʻq. Uchimiz.</p></article>
+        <article class="entry"><time>14-noyabr, 1987</time><p>Agar bu yozuvni oʻqiyotgan boʻlsangiz, ekran hozir yoningizda yoqilgan. Oynaga qaramang. U sizni oʻsha yerdan kuzatadi.</p></article>
+        <article class="entry last"><time>Sana yoʻq</time><p>Men eshikni yopdim. U ichkarida emas edi.</p></article>
+      </div>
+    </section>
+
+    <section id="talk" aria-labelledby="talk-h">
+      <div class="sec-head">
+        <span class="label">Yozuv № 7</span>
+        <h2 id="talk-h">U sizga gapirmoqchi</h2>
+      </div>
+      <div id="talk-out" aria-live="off"></div>
+      <div class="foot">
+        <span>Bu sahifa oʻyin-kulgi uchun yaratilgan. Hamma narsa toʻqima.</span>
+        <button class="link" id="again" type="button">Qayta boshlash</button>
+      </div>
+    </section>
+
+    <div class="foot-pad"></div>
+  </main>
+</div>
+
+<div id="gate" role="dialog" aria-label="Ogohlantirish">
+  <div class="gate-box">
+    <h2>OGOHLANTIRISH</h2>
+    <p>Bu sahifa sizni qoʻrqitish uchun yaratilgan. Qorongʻi xonada, yolgʻiz kirmang.</p>
+    <div class="warn"><strong>Yorugʻlik va ovoz haqida</strong><br>Sahifada bir marta kuchli yorugʻlik chaqnashi, titrash va baland ovoz bor. Tutqanoq yoki yorugʻlikka sezgirlik boʻlsa, pastdagi katakchani belgilang yoki kirmang.</div>
+    <label class="calm-opt"><input type="checkbox" id="calm-box"><span>Chaqnash va titrashlarsiz yumshoq rejim</span></label>
+    <button class="btn" id="go-sound" type="button">Kirish (ovoz bilan)</button>
+    <button class="link" id="go-mute" type="button">Ovozsiz kirish</button>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div id="dark" aria-hidden="true"></div>
+<div id="vig" aria-hidden="true"></div>
+<div id="grain" aria-hidden="true"></div>
+
+<div class="eye-pair e1" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+<div class="eye-pair e2" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+<div class="eye-pair e3" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+<div class="eye-pair e4" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+
+<div id="rec" aria-hidden="true"><b></b>REC · KAMERA 3 · <span id="rec-t">00:00:00</span></div>
+
+<div id="secret" hidden role="dialog" aria-label="Yashirin xabar">
+  <div>
+    <h3>Siz kalitni topdingiz</h3>
+    <p>7-xona eshigi ochildi. U ichkarida emas.</p>
+    <p>U sizning orqangizda.</p>
+    <small>Yopish uchun bosing</small>
+  </div>
+</div>
+
+<div id="jump" hidden aria-hidden="true">
+  <svg viewBox="0 0 200 260" aria-hidden="true">
+    <defs>
+      <radialGradient id="skin" cx="50%" cy="40%" r="65%">
+        <stop offset="0%" stop-color="#e6e0cc"/><stop offset="70%" stop-color="#a9a48f"/><stop offset="100%" stop-color="#4a4a40"/>
+      </radialGradient>
+    </defs>
+    <path d="M100 8C44 8 22 58 28 118c4 52 26 96 48 120 8 9 40 9 48 0 22-24 44-68 48-120C178 58 156 8 100 8z" fill="url(#skin)"/>
+    <ellipse cx="66" cy="104" rx="27" ry="40" fill="#000" transform="rotate(-8 66 104)"/>
+    <ellipse cx="136" cy="96" rx="24" ry="44" fill="#000" transform="rotate(6 136 96)"/>
+    <circle cx="68" cy="112" r="4" fill="#c40f0f"/>
+    <circle cx="136" cy="104" r="4" fill="#c40f0f"/>
+    <path d="M97 128l-6 34h12z" fill="#2b2b24"/>
+    <path d="M48 186c20 -10 82 -14 104 2 -4 36 -20 54 -52 56 -32 -2 -48 -22 -52 -58z" fill="#000"/>
+    <g stroke="#d9d3bb" stroke-width="3" stroke-linecap="round">
+      <path d="M62 190v14M76 188v20M90 187v24M104 187v24M118 188v20M132 190v14"/>
+    </g>
+  </svg>
+  <p>SIZNI KOʻRDIM</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement;
+  root.classList.add('locked');
+
+  var calm = false;
+  try { calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var calmBox = $('#calm-box');
+  var entered = false, muted = false, fired = false, armed = false, t0 = 0;
+  root.classList.toggle('calm', calm);
+  if (calmBox) calmBox.checked = calm;
+
+  /* ---------- grain texture ---------- */
+  try {
+    var nc = document.createElement('canvas'); nc.width = nc.height = 160;
+    var nx = nc.getContext('2d'); var id = nx.createImageData(160, 160);
+    for (var i = 0; i < id.data.length; i += 4) { var v = (Math.random() * 255) | 0; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+    nx.putImageData(id, 0, 0);
+    $('#grain').style.backgroundImage = 'url(' + nc.toDataURL('image/png') + ')';
+  } catch (e) {}
+
+  /* ---------- flashlight ---------- */
+  var dark = $('#dark');
+  var tx = innerWidth / 2, ty = innerHeight * 0.4, cx = tx, cy = ty, rad = 220, lastMove = 0;
+  function setT(x, y) { tx = x; ty = y; lastMove = performance.now(); }
+  addEventListener('pointermove', function (e) { setT(e.clientX, e.clientY); moveEyes(e.clientX, e.clientY); }, { passive: true });
+  addEventListener('touchstart', function (e) { var t = e.touches[0]; if (t) setT(t.clientX, t.clientY); }, { passive: true });
+  addEventListener('touchmove', function (e) { var t = e.touches[0]; if (t) { setT(t.clientX, t.clientY); moveEyes(t.clientX, t.clientY); } }, { passive: true });
+  function loop(ts) {
+    if (ts - lastMove > 4000) {
+      tx = innerWidth * (0.5 + Math.sin(ts / 1700) * 0.28);
+      ty = innerHeight * (0.45 + Math.cos(ts / 2300) * 0.22);
+    }
+    cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
+    var base = Math.min(270, Math.max(150, innerWidth * 0.38));
+    var flick = (!calm && Math.random() < 0.03) ? (Math.random() * 60 - 30) : 0;
+    rad += (base + flick - rad) * 0.3;
+    dark.style.setProperty('--x', cx.toFixed(1) + 'px');
+    dark.style.setProperty('--y', cy.toFixed(1) + 'px');
+    dark.style.setProperty('--r', rad.toFixed(1) + 'px');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  /* ---------- eyes ---------- */
+  var pairs = $$('.eye-pair');
+  function moveEyes(x, y) {
+    pairs.forEach(function (p) {
+      if (!p.classList.contains('on')) return;
+      var r = p.getBoundingClientRect();
+      var a = Math.atan2(y - (r.top + r.height / 2), x - (r.left + r.width / 2));
+      p.style.setProperty('--px', (Math.cos(a) * 7).toFixed(1) + 'px');
+      p.style.setProperty('--py', (Math.sin(a) * 3).toFixed(1) + 'px');
+    });
+  }
+  function showEyes(p, ms) {
+    p.classList.add('on'); moveEyes(tx, ty);
+    setTimeout(function () { p.classList.remove('on'); }, ms);
+  }
+  function eyeLoop() {
+    if (entered) {
+      var off = pairs.filter(function (p) { return !p.classList.contains('on'); });
+      if (off.length) showEyes(off[(Math.random() * off.length) | 0], 2200 + Math.random() * 2600);
+    }
+    setTimeout(eyeLoop, 4500 + Math.random() * 6500);
+  }
+
+  /* ---------- audio ---------- */
+  var ac = null, master = null, noiseBuf = null;
+  function startAudio() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ac = new AC();
+      var comp = ac.createDynamicsCompressor();
+      comp.connect(ac.destination);
+      master = ac.createGain(); master.gain.value = 0; master.connect(comp);
+      master.gain.linearRampToValueAtTime(0.9, ac.currentTime + 3);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+
+      var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 190; lp.connect(master);
+      [[41, 'sawtooth', 0.12], [43.3, 'sawtooth', 0.11], [82.6, 'triangle', 0.05]].forEach(function (c) {
+        var o = ac.createOscillator(); o.type = c[1]; o.frequency.value = c[0];
+        var g = ac.createGain(); g.gain.value = c[2];
+        o.connect(g); g.connect(lp); o.start();
+      });
+      var lfo = ac.createOscillator(); lfo.frequency.value = 0.07;
+      var lg = ac.createGain(); lg.gain.value = 70;
+      lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
+      setTimeout(whisper, 4000);
+    } catch (e) { ac = null; }
+  }
+  function whisper() {
+    if (ac) {
+      try {
+        var t = ac.currentTime;
+        var s = ac.createBufferSource(); s.buffer = noiseBuf; s.loop = true;
+        var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 7;
+        bp.frequency.setValueAtTime(1400 + Math.random() * 1200, t);
+        bp.frequency.linearRampToValueAtTime(900 + Math.random() * 2400, t + 1.8);
+        var g = ac.createGain();
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.09, t + 0.6); g.gain.linearRampToValueAtTime(0, t + 1.9);
+        var pan = ac.createStereoPanner ? ac.createStereoPanner() : null;
+        s.connect(bp); bp.connect(g);
+        if (pan) { pan.pan.value = Math.random() * 2 - 1; g.connect(pan); pan.connect(master); } else { g.connect(master); }
+        s.start(t); s.stop(t + 2);
+      } catch (e) {}
+    }
+    setTimeout(whisper, 5000 + Math.random() * 9000);
+  }
+  function thump(vol) {
+    if (!ac) return;
+    var t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(62, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.16);
+    g.gain.setValueAtTime(0.75 * vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.25);
+  }
+  function knock() {
+    if (!ac) return;
+    var t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.11);
+    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.25);
+  }
+  function creak() {
+    if (!ac) return;
+    var t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(180, t); o.frequency.linearRampToValueAtTime(95, t + 1.3);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.14, t + 0.3); g.gain.linearRampToValueAtTime(0, t + 1.4);
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 420; bp.Q.value = 5;
+    o.connect(bp); bp.connect(g); g.connect(master); o.start(t); o.stop(t + 1.5);
+  }
+  function sting() {
+    if (!ac) return;
+    var t = ac.currentTime;
+    var n = ac.createBufferSource(); n.buffer = noiseBuf;
+    var hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 700;
+    var ng = ac.createGain(); ng.gain.setValueAtTime(0.9, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+    n.connect(hp); hp.connect(ng); ng.connect(master); n.start(t); n.stop(t + 1.1);
+    [['sawtooth', 900, 170, 0.35], ['square', 1300, 260, 0.2], ['sine', 75, 28, 0.9]].forEach(function (c) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = c[0]; o.frequency.setValueAtTime(c[1], t); o.frequency.exponentialRampToValueAtTime(c[2], t + 0.9);
+      g.gain.setValueAtTime(c[3], t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + 1.2);
+    });
+  }
+
+  /* heartbeat: visual always, sound when enabled, speeds up over time */
+  var vig = $('#vig');
+  function beat() {
+    if (!entered) return;
+    thump(1); setTimeout(function () { thump(0.7); }, 190);
+    if (!calm) { vig.classList.add('beat'); setTimeout(function () { vig.classList.remove('beat'); }, 150); }
+    var el = (performance.now() - t0) / 1000;
+    setTimeout(beat, Math.max(460, 1250 - el * 7));
+  }
+
+  /* ---------- flickering words ---------- */
+  var flicks = $$('.flick');
+  setInterval(function () {
+    if (!entered || calm || !flicks.length) return;
+    var el = flicks[(Math.random() * flicks.length) | 0];
+    if (el.dataset.busy) return;
+    el.dataset.busy = '1';
+    var orig = el.innerHTML;
+    el.textContent = el.dataset.alt; el.classList.add('alt');
+    setTimeout(function () { el.innerHTML = orig; el.classList.remove('alt'); delete el.dataset.busy; }, 120 + Math.random() * 200);
+  }, 1500);
+
+  /* ---------- ghost words & screen dips ---------- */
+  var ghosts = ['ORQANGDA', 'BIZ SENI KOʻRAMIZ', 'QARAMA', 'U YAQIN', 'YOLGʻIZ EMASSAN', 'JIM'];
+  function ghostLoop() {
+    if (entered && !calm) {
+      var g = document.createElement('div');
+      g.className = 'ghost'; g.textContent = ghosts[(Math.random() * ghosts.length) | 0];
+      g.style.left = (4 + Math.random() * 40) + '%'; g.style.top = (12 + Math.random() * 70) + '%';
+      document.body.appendChild(g);
+      setTimeout(function () { g.remove(); }, 1600);
+    }
+    setTimeout(ghostLoop, 9000 + Math.random() * 10000);
+  }
+  function dipLoop() {
+    if (entered && !calm) {
+      dark.classList.add('dip');
+      setTimeout(function () { dark.classList.remove('dip'); }, 70);
+      setTimeout(function () { dark.classList.add('dip'); }, 160);
+      setTimeout(function () { dark.classList.remove('dip'); }, 210);
+    }
+    setTimeout(dipLoop, 6000 + Math.random() * 9000);
+  }
+
+  /* ---------- redacted lines ---------- */
+  $$('.redact').forEach(function (r) {
+    var orig = r.textContent, rev = r.dataset.reveal;
+    r.tabIndex = 0; r.setAttribute('role', 'button'); r.setAttribute('aria-label', 'Yashirilgan matn');
+    function show() {
+      if (r.classList.contains('open')) return;
+      r.classList.add('open'); r.textContent = rev; knock();
+      setTimeout(function () { r.classList.remove('open'); r.textContent = orig; }, 2400);
+    }
+    r.addEventListener('click', show);
+    r.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(); } });
+  });
+
+  /* ---------- hidden key ---------- */
+  var secret = $('#secret');
+  $('#key').addEventListener('click', function () {
+    secret.hidden = false; creak();
+    var off = pairs.filter(function (p) { return !p.classList.contains('on'); });
+    if (off.length) showEyes(off[0], 3500);
+  });
+  secret.addEventListener('click', function () { secret.hidden = true; });
+
+  /* ---------- REC ---------- */
+  var rec = $('#rec'), recT = $('#rec-t');
+  function pad(n) { return String(n).padStart(2, '0'); }
+  setInterval(function () {
+    if (!entered) return;
+    var s = Math.floor((performance.now() - t0) / 1000);
+    recT.textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+  }, 1000);
+
+  /* ---------- fake errors ---------- */
+  var errs = [
+    ['tizim.exe — xato', 'Arxiv fayli № 7 oʻz-oʻzidan ochildi. Uni hech kim ochmagan.'],
+    ['kamera.dll — ogohlantirish', 'Kamera 3: harakat aniqlandi. Xonada siz bilan birga yana bir kishi bor.'],
+    ['ulanish — uzildi', 'Oxirgi kirgan foydalanuvchi: SIZ. Siz bu yerda oldin ham boʻlgansiz. Eslolmaysiz.']
+  ];
+  function popup(i) {
+    if (!entered) return;
+    var e = document.createElement('div'); e.className = 'err'; e.setAttribute('role', 'alertdialog');
+    e.style.transform = 'translate(calc(-50% + ' + ((Math.random() * 80 - 40) | 0) + 'px), calc(-50% + ' + ((Math.random() * 80 - 40) | 0) + 'px))';
+    e.innerHTML = '<div class="bar"></div><div class="body"><p></p></div><div class="acts"><button type="button">OK</button></div>';
+    $('.bar', e).textContent = errs[i][0]; $('p', e).textContent = errs[i][1];
+    $('button', e).addEventListener('click', function () { e.remove(); knock(); });
+    document.body.appendChild(e);
+    knock();
+  }
+
+  /* ---------- scroll: diary entries ---------- */
+  var seenCount = 0;
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (list) {
+      list.forEach(function (it) {
+        if (it.isIntersecting && !it.target.classList.contains('seen')) {
+          it.target.classList.add('seen'); seenCount++;
+          if (entered && seenCount % 2 === 0) knock();
+        }
+      });
+    }, { threshold: 0.6 });
+    $$('.entry').forEach(function (e) { io.observe(e); });
+  }
+
+  /* ---------- final: talks using local time ---------- */
+  var talked = false;
+  function timeLines() {
+    var d = new Date(), h = d.getHours();
+    var secs = Math.max(1, Math.round((performance.now() - t0) / 1000));
+    var spent = secs < 90 ? secs + ' soniyadan beri' : Math.round(secs / 60) + ' daqiqadan beri';
+    var mood = (h >= 22 || h < 5) ? 'Kech boʻldi. Hamma uxlayapti. Sen-chi?'
+      : (h < 12 ? 'Ertalab ham u shu yerda. U hech qachon ketmaydi.' : 'Kunduzi ham u uxlamaydi.');
+    return [
+      'Hozir soat ' + pad(h) + ':' + pad(d.getMinutes()) + '.',
+      mood,
+      'Qora Qanotda soat doim 03:13 ni koʻrsatadi.',
+      'Sen bu sahifada ' + spent + ' turibsan.',
+      'Yoningda kimdir bor, shunday emasmi? U ham ekranga qarayapti.',
+      '*Endi orqangga qarama.'
+    ];
+  }
+  function typeLines(lines, out) {
+    var li = 0;
+    function next() {
+      if (li >= lines.length) {
+        setTimeout(function () { knock(); var off = pairs.filter(function (p) { return !p.classList.contains('on'); }); if (off.length) showEyes(off[0], 4000); }, 1800);
+        return;
+      }
+      var raw = lines[li++], hot = raw.charAt(0) === '*', txt = hot ? raw.slice(1) : raw;
+      var p = document.createElement('p'); if (hot) p.className = 'hot'; p.classList.add('caret'); out.appendChild(p);
+      var ci = 0;
+      (function step() {
+        if (calm) { p.textContent = txt; p.classList.remove('caret'); setTimeout(next, 500); return; }
+        p.textContent = txt.slice(0, ++ci);
+        if (ci < txt.length) setTimeout(step, 38);
+        else { p.classList.remove('caret'); setTimeout(next, 900); }
+      })();
+    }
+    next();
+  }
+  if ('IntersectionObserver' in window) {
+    var tio = new IntersectionObserver(function (l) {
+      if (l[0].isIntersecting && !talked && entered) {
+        talked = true; typeLines(timeLines(), $('#talk-out'));
+      }
+    }, { threshold: 0.35 });
+    tio.observe($('#talk'));
+  } else {
+    addEventListener('scroll', function () { if (!talked && entered && scrollY > document.body.scrollHeight * 0.6) { talked = true; typeLines(timeLines(), $('#talk-out')); } });
+  }
+
+  /* ---------- jump scare (once) ---------- */
+  function fire() {
+    if (fired || !entered) return;
+    fired = true;
+    var j = $('#jump'); j.hidden = false; j.setAttribute('aria-hidden', 'false');
+    void j.offsetWidth; j.classList.add('go');
+    sting();
+    try { if (navigator.vibrate) navigator.vibrate([200, 80, 300]); } catch (e) {}
+    var page = $('#page');
+    if (!calm) { page.classList.add('shake'); setTimeout(function () { page.classList.remove('shake'); }, 1100); }
+    setTimeout(function () { j.classList.remove('go'); j.hidden = true; j.setAttribute('aria-hidden', 'true'); }, calm ? 1600 : 2250);
+  }
+  addEventListener('scroll', function () { if (armed && !fired && scrollY > 120) fire(); }, { passive: true });
+
+  /* ---------- tab title ---------- */
+  var title = document.title;
+  document.addEventListener('visibilitychange', function () {
+    document.title = document.hidden ? 'Orqangga qara…' : title;
+  });
+
+  /* ---------- gate ---------- */
+  var gate = $('#gate');
+  function enter(withSound) {
+    if (entered) return;
+    entered = true; muted = !withSound; t0 = performance.now();
+    if (calmBox) { calm = calmBox.checked || calm; root.classList.toggle('calm', calm); }
+    if (withSound) startAudio();
+    gate.classList.add('gone');
+    setTimeout(function () { gate.hidden = true; }, 1200);
+    root.classList.remove('locked');
+    window.scrollTo(0, 0);
+    rec.classList.add('show');
+    setTimeout(beat, 1500);
+    setTimeout(eyeLoop, 5000);
+    setTimeout(ghostLoop, 12000);
+    setTimeout(dipLoop, 8000);
+    setTimeout(function () { popup(0); }, 26000);
+    setTimeout(function () { popup(1); }, 58000);
+    setTimeout(function () { popup(2); }, 100000);
+    setTimeout(function () { armed = true; }, 40000);
+    setTimeout(fire, 85000);
+  }
+  $('#go-sound').addEventListener('click', function () { enter(true); });
+  $('#go-mute').addEventListener('click', function () { enter(false); });
+  $('#again').addEventListener('click', function () { location.reload(); });
+})();
+</script>
+
+</body></html>
